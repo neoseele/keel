@@ -1,0 +1,91 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "fortio.fullname" . }}
+  labels:
+    app: {{ template "fortio.name" . }}
+    chart: {{ template "fortio.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/service.yaml") . | sha256sum }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "fortio.name" . }}
+      release: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "fortio.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - server
+            - -logtostderr
+            - -v=2
+            - -redirect-port=disabled
+            - -cert=/tls/tls.crt
+            - -key=/tls/tls.key
+            - -data-dir=/data
+          ports:
+            - name: grpc
+              containerPort: 8079
+              protocol: TCP
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: https
+              containerPort: 8082
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+# [START resources]
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+# [END resources]
+# [START volumeMounts]
+          {{- with .Values.volume }}
+          {{- if .enabled }}
+          volumeMounts:
+{{ toYaml .mounts | indent 12 }}
+          {{- end }}
+          {{- end }}
+# [END volumeMounts]
+# [START volumes]
+    {{- with .Values.volume }}
+    {{- if .enabled }}
+      volumes:
+{{ toYaml .disks | indent 8 }}
+    {{- end }}
+    {{- end }}
+# [END volumes]
+# [START nodeSelector]
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+# [END nodeSelector]
+# [START affinity]
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+# [END affinity]
+# [START tolerations]
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+# [END tolerations]

@@ -1,0 +1,18 @@
+{{- if .Values.pvc.enabled -}}
+{{- with .Values.pvc }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+    name: {{ .name }}
+spec:
+  accessModes:
+    {{- range .accessModes }}
+    - {{ . }}
+    {{- end }}
+  volumeMode: {{ .volumeMode | default "Filesystem" }}
+  resources:
+    requests:
+      storage: {{ .size | default "2Gi" }}
+  storageClassName: {{ .storageClassName | default "standard" }}
+{{- end }}
+{{- end }}
