@@ -10,6 +10,7 @@ metadata:
   annotations:
     checksum/config: {{ include (print $.Template.BasePath "/service.yaml") . | sha256sum }}
 spec:
+  minReadySeconds: 30
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
@@ -21,6 +22,7 @@ spec:
         app: {{ template "fortio.name" . }}
         release: {{ .Release.Name }}
     spec:
+      terminationGracePeriodSeconds: 60
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -55,22 +57,43 @@ spec:
           resources:
 {{ toYaml .Values.resources | indent 12 }}
 # [END resources]
-# [START volumeMounts]
-          {{- with .Values.volume }}
-          {{- if .enabled }}
           volumeMounts:
-{{ toYaml .mounts | indent 12 }}
+# [START customTLS mount]
+          {{- if .Values.customTLS.enabled }}
+            - name: tls
+              mountPath: /tls
           {{- end }}
+# [END customTLS mount]
+# [START dataVolumes mount]
+          {{- with .Values.dataVolumes }}
+            {{- if .enabled }}
+              {{- range .volumes }}
+            - name: {{ .name }}
+              mountPath: {{ .mountPath }}
+              {{- end }}
+            {{- end }}
           {{- end }}
-# [END volumeMounts]
-# [START volumes]
-    {{- with .Values.volume }}
-    {{- if .enabled }}
+# [END dataVolumes mount]
       volumes:
-{{ toYaml .disks | indent 8 }}
-    {{- end }}
-    {{- end }}
-# [END volumes]
+# [START customTLS vol]
+      {{- with .Values.customTLS }}
+        {{- if .enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .secret }}
+        {{- end }}
+      {{- end }}
+# [END customTLS vol]
+# [START dataVolumes ]
+      {{- with .Values.dataVolumes }}
+        {{- if .enabled }}
+          {{- range .volumes }}
+        - name: {{ .name }}
+{{ toYaml .disk | indent 10 }}          
+          {{- end }}
+        {{- end }}
+      {{- end }}
+# [END dataVolumes ]
 # [START nodeSelector]
     {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -78,10 +101,59 @@ spec:
     {{- end }}
 # [END nodeSelector]
 # [START affinity]
-    {{- with .Values.affinity }}
       affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+      {{- with .Values.nodeAffinity }}
+        nodeAffinity:
+        {{- if .soft }}
+{{ toYaml .soft | indent 10 }}
+        {{- end }}
+        {{- if .hard }}
+{{ toYaml .hard | indent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.podAffinity }}
+        podAffinity:
+        {{- if .soft }}
+{{ toYaml .soft | indent 10 }}
+        {{- end }}
+        {{- if .hard }}
+{{ toYaml .hard | indent 10 }}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.podAntiAffinity }}
+        {{- if .soft }}
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - {{ template "fortio.name" $ }}
+                - key: release
+                  operator: In
+                  values:
+                  - {{ $.Release.Name }}
+              topologyKey: "kubernetes.io/hostname"
+        {{- end }}
+        {{- if .hard }}
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - {{ template "fortio.name" $ }}
+              - key: release
+                operator: In
+                values:
+                - {{ $.Release.Name }}
+            topologyKey: "kubernetes.io/hostname"
+        {{- end }}
+      {{- end }}
 # [END affinity]
 # [START tolerations]
     {{- with .Values.tolerations }}

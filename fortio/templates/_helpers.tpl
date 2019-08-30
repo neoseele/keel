@@ -30,3 +30,10 @@ Create chart name and version as used by the chart label.
 {{- define "fortio.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Generate our broker URL for RabbitMQ.
+*/}}
+{{- define "blah" -}}
+{{- printf "blah" .Release.Name -}}
+{{- end -}}

@@ -9,20 +9,14 @@ image:
   tag: latest
   pullPolicy: Always
 
-volume:
+dataVolumes:
   enabled: false
-  mounts:
-    - name: tls
-      mountPath: /tls
+  volumes:
     - name: data
       mountPath: /data
-  disks:
-    - name: tls
-      secret:
-        secretName: premium-cloud-support-com-tls
-    - name: data
-      persistentVolumeClaim:
-        claimName: fortio-data-pvc
+      disk:
+        persistentVolumeClaim:
+          claimName: fortio-data-pvc
 
 customTLS:
   enabled: false
@@ -34,7 +28,8 @@ pvc:
   accessModes:
     - ReadWriteOnce
   # volumeModes: Filesystem
-  # size: 2Gi
+  # requests: 2Gi
+  # limits: 10Gi
   # storageClassName: standard
 
 service:
@@ -46,26 +41,21 @@ service:
   # externalTrafficPolicy: Cluster
   sessionAffinity: None
   # sessionAffinity: ClientIP
-  ilb: 
-    enabled: false
-  headless: 
-    enabled: false
-  http2: 
-    enabled: false
+  ilb: false
+  headless: false
+  http2: false
 
   ports:
     grpc:
-      enabled: true
       port: 8079
     http:
-      enabled: true
       port: 8080
     https:
-      enabled: true
       port: 8082
 
 ingress:
   enabled: false
+  neg: false
   annotations:
     kubernetes.io/ingress.global-static-ip-name: asuka
     kubernetes.io/ingress.class: gce
@@ -95,17 +85,41 @@ resources:
 nodeSelector: {}
 
 tolerations:
-  - operator: Exists
+  - operator: Exists # tolerates everything
 
-affinity:
-  podAntiAffinity:
+nodeAffinity:
+  soft:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: failure-domain.beta.kubernetes.io/zone
+          operator: In
+          values:
+          - us-central1-a
+  hard:
+    # preferredDuringSchedulingIgnoredDuringExecution:
+    #   - weight: 100
+    #     preference:
+    #       matchExpressions:
+    #       - key: failure-domain.beta.kubernetes.io/zone
+    #         operator: In
+    #         values:
+    #         - us-central1-a
+
+podAffinity:
+  soft:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 1
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app
-            operator: In
-            values:
-            - fortio
-        topologyKey: "kubernetes.io/hostname"
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - foo
+          topologyKey: "kubernetes.io/hostname"
+  hard: {}
+
+podAntiAffinity:
+  soft: true
+  hard: false

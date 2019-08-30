@@ -4,11 +4,14 @@ kind: Service
 metadata:
   name: {{ template "fortio.fullname" . }}
   annotations:
-    {{- if and (eq .Values.service.ilb.enabled true) (contains "LoadBalancer" .Values.service.type) }}
+    {{- if and (eq .Values.service.ilb true) (contains "LoadBalancer" .Values.service.type) }}
     cloud.google.com/load-balancer-type: internal
     {{- end }}
-    {{- if .Values.service.http2.enabled }}
+    {{- if .Values.service.http2 }}
     cloud.google.com/app-protocols: '{"grpc":"HTTP2","http":"HTTP","https":"HTTP2"}'
+    {{- end }}
+    {{- if .Values.ingress.neg }}
+    cloud.google.com/neg: '{"ingress": true}'
     {{- end }}
   labels:
     app: {{ template "fortio.name" . }}
@@ -17,13 +20,12 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
 {{- with .Values.service }}
-  {{- if ne .headless.enabled true }}
+  {{- if ne .headless true }}
   sessionAffinity: {{ .sessionAffinity | default "None" }}
   {{- end }}
-
   {{-  if contains "ClusterIP" .type }}
   type: ClusterIP
-    {{- if .headless.enabled }}
+    {{- if .headless }}
   ClusterIP: None
     {{- end }}
   {{- else if contains "NodePort" .type }}
@@ -37,19 +39,19 @@ spec:
 {{- end }}
   ports:
   {{- with .Values.service.ports }}
-    {{- if .grpc.enabled }}
+    {{- if .grpc }}
     - port: {{ .grpc.port }}
       targetPort: grpc
       protocol: TCP
       name: grpc
     {{- end }}
-    {{- if .http.enabled }}
+    {{- if .http }}
     - port: {{ .http.port }}
       targetPort: http
       protocol: TCP
       name: http
     {{- end }}
-    {{- if .https.enabled }}
+    {{- if .https }}
     - port: {{ .https.port }}
       targetPort: https
       protocol: TCP

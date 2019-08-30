@@ -12,7 +12,9 @@ spec:
   volumeMode: {{ .volumeMode | default "Filesystem" }}
   resources:
     requests:
-      storage: {{ .size | default "2Gi" }}
+      storage: {{ .requests | default "2Gi" }}
+    limits:
+      storage: {{ .limits | default "10Gi" }}
   storageClassName: {{ .storageClassName | default "standard" }}
 {{- end }}
 {{- end }}
