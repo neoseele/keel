@@ -2,6 +2,7 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: {{ template "fortio.fullname" . }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "fortio.name" . }}
     chart: {{ template "fortio.chart" . }}
@@ -24,6 +25,7 @@ spec:
     spec:
       terminationGracePeriodSeconds: 60
       containers:
+# [START app container]
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -53,54 +55,44 @@ spec:
             httpGet:
               path: /
               port: http
-# [START resources]
+          # [START resources]
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-# [END resources]
+          # [END resources]
           volumeMounts:
-# [START customTLS mount]
-          {{- if .Values.customTLS.enabled }}
+            # [START tls mount]
+            {{- if .Values.tls.enabled }}
             - name: tls
               mountPath: /tls
-          {{- end }}
-# [END customTLS mount]
-# [START dataVolumes mount]
-          {{- with .Values.dataVolumes }}
-            {{- if .enabled }}
-              {{- range .volumes }}
-            - name: {{ .name }}
-              mountPath: {{ .mountPath }}
-              {{- end }}
             {{- end }}
-          {{- end }}
-# [END dataVolumes mount]
+            # [END tls mount]
+            # [START data mount]
+            {{- if .Values.data.enabled }}
+            - name: data
+              mountPath: /data
+            {{- end }}
+            # [END data mount]
       volumes:
-# [START customTLS vol]
-      {{- with .Values.customTLS }}
-        {{- if .enabled }}
+        # [START tls secret]
+        {{- if .Values.tls.enabled }}
         - name: tls
           secret:
-            secretName: {{ .secret }}
+            secretName: {{ .Values.tls.secretName }}
         {{- end }}
-      {{- end }}
-# [END customTLS vol]
-# [START dataVolumes ]
-      {{- with .Values.dataVolumes }}
-        {{- if .enabled }}
-          {{- range .volumes }}
-        - name: {{ .name }}
-{{ toYaml .disk | indent 10 }}          
-          {{- end }}
+        # [END tls secret]
+        # [START data volume]
+        {{- if .Values.data.enabled }}
+        - name: data
+{{ toYaml .Values.data.volume | indent 10 }}
         {{- end }}
-      {{- end }}
-# [END dataVolumes ]
-# [START nodeSelector]
-    {{- with .Values.nodeSelector }}
+        # [END data volume ]
+      # [START nodeSelector]
+        {{- with .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml . | indent 8 }}
-    {{- end }}
-# [END nodeSelector]
-# [START affinity]
+        {{- end }}
+      # [END nodeSelector]
+      # [START affinity]
       affinity:
       {{- with .Values.nodeAffinity }}
         nodeAffinity:
@@ -121,43 +113,33 @@ spec:
         {{- end }}
       {{- end }}
       {{- with .Values.podAntiAffinity }}
-        {{- if .soft }}
         podAntiAffinity:
-          preferredDuringSchedulingIgnoredDuringExecution:
-          - weight: 1
-            podAffinityTerm:
-              labelSelector:
-                matchExpressions:
-                - key: app
-                  operator: In
-                  values:
-                  - {{ template "fortio.name" $ }}
-                - key: release
-                  operator: In
-                  values:
-                  - {{ $.Release.Name }}
-              topologyKey: "kubernetes.io/hostname"
+        {{- if .soft }}
+{{ toYaml .soft | indent 10 }}
         {{- end }}
         {{- if .hard }}
-        podAntiAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - {{ template "fortio.name" $ }}
-              - key: release
-                operator: In
-                values:
-                - {{ $.Release.Name }}
-            topologyKey: "kubernetes.io/hostname"
+{{ toYaml .hard | indent 10 }}
         {{- end }}
       {{- end }}
-# [END affinity]
-# [START tolerations]
-    {{- with .Values.tolerations }}
+      # [END affinity]
+      # [START tolerations]
+      {{- with .Values.tolerations }}
       tolerations:
 {{ toYaml . | indent 8 }}
-    {{- end }}
-# [END tolerations]
+      {{- end }}
+      # [END tolerations]
+# [END app container]
+# [START init container]
+      initContainers:
+      {{- if .Values.data.enabled }}
+      - name: init-data
+        image: busybox
+        command: 
+        - /bin/sh
+        - -c
+        - "[ -f /data/a.json ] || date +'%F %T %Z' > /data/a.json"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      {{- end }}
+# [END init container]

@@ -2,18 +2,22 @@
 {{- $fullName := include "fortio.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $servicePort := .Values.ingress.servicePort -}}
+{{- $namespace := .Release.Namespace -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
+  namespace: {{ $namespace }}
   labels:
     app: {{ template "fortio.name" . }}
     chart: {{ template "fortio.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-{{- with .Values.ingress.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
+{{- if .Values.ingress.nginx }}
+{{ toYaml .Values.ingress.annotations.nginx | indent 4 }}
+{{- else }}
+{{ toYaml .Values.ingress.annotations.gce | indent 4 }}
 {{- end }}
 spec:
 {{- if .Values.ingress.tls }}

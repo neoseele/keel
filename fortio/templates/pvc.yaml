@@ -1,20 +1,15 @@
 {{- if .Values.pvc.enabled -}}
+{{- $namespace := .Release.Namespace -}}
 {{- with .Values.pvc }}
+    {{- range .claims }}
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-    name: {{ .name }}
+  name: {{ .name }}
+  namespace: {{ $namespace }}
 spec:
-  accessModes:
-    {{- range .accessModes }}
-    - {{ . }}
+{{ toYaml .spec | indent 2 }}
     {{- end }}
-  volumeMode: {{ .volumeMode | default "Filesystem" }}
-  resources:
-    requests:
-      storage: {{ .requests | default "2Gi" }}
-    limits:
-      storage: {{ .limits | default "10Gi" }}
-  storageClassName: {{ .storageClassName | default "standard" }}
 {{- end }}
 {{- end }}
