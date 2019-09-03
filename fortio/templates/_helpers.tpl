@@ -32,8 +32,12 @@ Create chart name and version as used by the chart label.
 {{- end -}}
 
 {{/*
-Generate our broker URL for RabbitMQ.
+Create data volume name from fullname
 */}}
-{{- define "blah" -}}
-{{- printf "blah" .Release.Name -}}
+{{- define "fortio.dataVolumeName" -}}
+{{- printf "%s-%s" (include "fortio.fullname" .) "data" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{- define "fortio.tlsSecretName" -}}
+{{- printf "%s-%s" (include "fortio.fullname" .) "tls" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}

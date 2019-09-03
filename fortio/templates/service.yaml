@@ -1,17 +1,22 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.service.enabled -}}
+{{- $type := .Values.service.type | default "ClusterIP" }}
+{{- $fullName := include "fortio.fullname" . -}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "fortio.fullname" . }}
+  name: {{ $fullName }}
   annotations:
-    {{- if and (eq .Values.service.ilb true) (contains "LoadBalancer" .Values.service.type) }}
+    {{- if and .Values.service.ilb.enabled (contains "LoadBalancer" $type) }}
     cloud.google.com/load-balancer-type: internal
     {{- end }}
-    {{- if .Values.service.http2 }}
+    {{- if .Values.service.http2.enabled }}
     cloud.google.com/app-protocols: '{"grpc":"HTTP2","http":"HTTP","https":"HTTP2"}'
     {{- end }}
-    {{- if .Values.ingress.neg }}
+    {{- if .Values.ingress.neg.enabled }}
     cloud.google.com/neg: '{"ingress": true}'
+    {{- end }}
+    {{- if .Values.ingress.iap.enabled }}
+    beta.cloud.google.com/backend-config: '{"ports": {"default":"{{ $fullName }}"}}'
     {{- end }}
   labels:
     app: {{ template "fortio.name" . }}
@@ -20,39 +25,31 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
 {{- with .Values.service }}
-  {{- if ne .headless true }}
-  sessionAffinity: {{ .sessionAffinity | default "None" }}
-  {{- end }}
-  {{-  if contains "ClusterIP" .type }}
+  {{- if .headless.enabled }}
   type: ClusterIP
-    {{- if .headless }}
-  ClusterIP: None
-    {{- end }}
-  {{- else if contains "NodePort" .type }}
-  type: NodePort
-  externalTrafficPolicy: {{ .externalTrafficPolicy | default "Cluster" }}
+  clusterIP: None
   {{- else }}
-  type: LoadBalancer
+  type: {{ $type }}
+  sessionAffinity: {{ .sessionAffinity | default "None" }}
+    {{- if or (contains "LoadBalancer" $type) (contains "NodePort" $type ) }}
   externalTrafficPolicy: {{ .externalTrafficPolicy | default "Cluster" }}
+    {{- end }}
   {{- end }}
-
-{{- end }}
   ports:
-  {{- with .Values.service.ports }}
-    {{- if .grpc }}
-    - port: {{ .grpc.port }}
+    {{- if .externalPort.grpc }}
+    - port: {{ .externalPort.grpc }}
       targetPort: grpc
       protocol: TCP
       name: grpc
     {{- end }}
-    {{- if .http }}
-    - port: {{ .http.port }}
+    {{- if .externalPort.http }}
+    - port: {{ .externalPort.http }}
       targetPort: http
       protocol: TCP
       name: http
     {{- end }}
-    {{- if .https }}
-    - port: {{ .https.port }}
+    {{- if .externalPort.https }}
+    - port: {{ .externalPort.https }}
       targetPort: https
       protocol: TCP
       name: https

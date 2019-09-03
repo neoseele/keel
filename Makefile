@@ -3,13 +3,17 @@ release=test
 test:
 	@helm template fortio \
 	--name ${release} \
-	--set tls.enabled=true \
-	--set pvc.enabled=true \
-	--set data.enabled=true \
+	--set customTLS.enabled=true \
+	--set persistence.enabled=true \
 	--set service.enabled=true \
-	--set service.type=ClusterIP \
+	--set service.type=NodePort \
+	--set service.ilb.enabled=false \
+	--set service.headless.enabled=false \
+	--set service.http2.enabled=true \
 	--set ingress.enabled=true \
-	--set ingress.nginx=true \
+	--set ingress.tls.enabled=true \
+	--set ingress.nginx.enabled=false \
+	--set ingress.iap.enabled=true \
 	--set nodeAffinity='' \
 	--set podAffinity='' \
 	--set podAntiAffinity='' \
@@ -18,9 +22,8 @@ test:
 clean:
 	@helm template fortio \
 	--name ${release} \
-	--set tls.enabled=true \
-	--set pvc.enabled=true \
-	--set data.enabled=true \
+	--set customTLS.enabled=true \
+	--set persistence.enabled=true \
 	--set service.enabled=true \
 	--set ingress.enabled=true \
 	--set ingress.nginx=true \

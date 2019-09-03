@@ -1,7 +1,7 @@
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "fortio.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
-{{- $servicePort := .Values.ingress.servicePort -}}
+{{- $servicePort := .Values.ingress.servicePort | default "http" -}}
 {{- $namespace := .Release.Namespace -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -14,30 +14,21 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-{{- if .Values.ingress.nginx }}
-{{ toYaml .Values.ingress.annotations.nginx | indent 4 }}
-{{- else }}
-{{ toYaml .Values.ingress.annotations.gce | indent 4 }}
-{{- end }}
+    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+{{ toYaml .Values.ingress.annotations | indent 4 }}
 spec:
-{{- if .Values.ingress.tls }}
+{{- if .Values.ingress.tls.enabled }}
   tls:
-  {{- range .Values.ingress.tls }}
     - hosts:
-      {{- range .hosts }}
-        - {{ . }}
-      {{- end }}
-      secretName: {{ .secretName }}
-  {{- end }}
+        - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.tls.existingSecret | default (include "fortio.tlsSecretName" .) }}
 {{- end }}
   rules:
-  {{- range .Values.ingress.hosts }}
-    - host: {{ . }}
+    - host:  {{ .Values.ingress.host }}
       http:
         paths:
-          - path: {{ $ingressPath }}
+          - path: {{ $ingressPath | default "/*" }}
             backend:
               serviceName: {{ $fullName }}
               servicePort: {{ $servicePort }}
-  {{- end }}
 {{- end }}
