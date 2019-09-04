@@ -8,5 +8,5 @@ spec:
   iap:
     enabled: true
     oauthclientCredentials:
-      secretName: {{ .Values.ingress.iap.existingSecret }}
+      secretName: {{ .Values.ingress.iap.existingSecret | default (include "fortio.iapSecretName" .) }}
 {{- end }}

@@ -38,6 +38,16 @@ Create data volume name from fullname
 {{- printf "%s-%s" (include "fortio.fullname" .) "data" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
+{{/*
+Create tls secret name from fullname
+*/}}
 {{- define "fortio.tlsSecretName" -}}
 {{- printf "%s-%s" (include "fortio.fullname" .) "tls" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
+Create iap secret name from fullname
+*/}}
+{{- define "fortio.iapSecretName" -}}
+{{- printf "%s-%s" (include "fortio.fullname" .) "iap" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
