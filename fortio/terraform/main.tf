@@ -1,3 +1,7 @@
+provider "google" {
+  version = "~> 2.12.0"
+}
+
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
   project_id                 = "${var.project_id}"
