@@ -106,28 +106,25 @@ spec:
       affinity:
       {{- with .Values.nodeAffinity }}
         nodeAffinity:
-        {{- if .soft }}
+        {{- if eq .type "soft" }}
 {{ toYaml .soft | indent 10 -}}
-        {{- end }}
-        {{- if .hard }}
+        {{- else }}
 {{ toYaml .hard | indent 10 -}}
         {{- end }}
       {{- end }}
       {{- with .Values.podAffinity }}
         podAffinity:
-        {{- if .soft }}
+        {{- if eq .type "soft" }}
 {{ toYaml .soft | indent 10 -}}
-        {{- end }}
-        {{- if .hard }}
+        {{- else }}
 {{ toYaml .hard | indent 10 -}}
         {{- end }}
       {{- end }}
       {{- with .Values.podAntiAffinity }}
         podAntiAffinity:
-        {{- if .soft }}
+        {{- if eq .type "soft" }}
 {{ toYaml .soft | indent 10 -}}
-        {{- end }}
-        {{- if .hard }}
+        {{- else }}
 {{ toYaml .hard | indent 10 -}}
         {{- end }}
       {{- end }}

@@ -29,6 +29,7 @@ tolerations:
 - operator: Exists # tolerates everything
 
 nodeAffinity:
+  type: soft
   soft:
     requiredDuringSchedulingIgnoredDuringExecution:
       nodeSelectorTerms:
@@ -48,6 +49,7 @@ nodeAffinity:
             - us-central1-a
 
 podAffinity:
+  type: soft
   soft:
     preferredDuringSchedulingIgnoredDuringExecution:
     - weight: 100
@@ -70,6 +72,7 @@ podAffinity:
       topologyKey: "kubernetes.io/hostname"
 
 podAntiAffinity:
+  type: soft
   soft:
     preferredDuringSchedulingIgnoredDuringExecution:
     - weight: 1
@@ -141,16 +144,16 @@ service:
   enabled: false
   ##
   ## Service type (default to "ClusterIP")
-  # type: ClusterIP
+  type: ClusterIP
   # type: LoadBalancer
   # type: NodePort
   ##
   ## External traffic policy (default to "Cluster")
-  # externalTrafficPolicy: Cluster
+  externalTrafficPolicy: Cluster
   # externalTrafficPolicy: Local
   ##
   ## Session affinity (default to "None")
-  # sessionAffinity: None
+  sessionAffinity: None
   # sessionAffinity: ClientIP
 
   ilb: 
@@ -197,8 +200,8 @@ ingress:
   ##
   ## servicePort (default to "http")
   # servicePort: http
-  servicePort: https
-  # servicePort: grpc
+  # servicePort: https
+  servicePort: grpc
   host: asuka.premium-cloud-support.com
   
 ##
@@ -208,13 +211,14 @@ defaultTLS:
   key: "LS0tLS1CRUdJTiBQUklWQVRFIEtFWS0tLS0tCk1JSUV2Z0lCQURBTkJna3Foa2lHOXcwQkFRRUZBQVNDQktnd2dnU2tBZ0VBQW9JQkFRRE93M0tLQ3pEN3VrdE8KbXQvekN2ZnUxdDJ2L0lNblNranRKN1QzMjFUVThPVitHdUJMMVpGemUvM0p1enc2YXhhSHBqQXhSMkFvOG4vVwpWczlTM2VBMFBKNlpoZUVSZjB4NHFkeExpaGxqbGNyMGNRWFQwR1NUbFRtTlJ4YmpubHRWR0lkd2hRdHRTZSttClNrNVFRUitFT2lZMkZaS1lLck0xN3VPcDlqcTdNM1JITWxEKzNQaklhd1dvYVMvSmdoSmlwSlM3RmUxejhZMVQKd1hQUDExQlJYdFFXM25xdjJ4YjVhTlR3U3Vyb01yUFIybHd5U0JTUU1DS0hCVDJ0cG14VEIvUzVGNGtzb0pGdQptLyt2blpYNzhWM0toK3VmSEMvRkdsU1hVV0Z4dFBqSHdJWmkvdms3cDR5SFBYRnMwUmlJNU5vbDJSbzZNMjBiCjlNdHRFcmtaQWdNQkFBRUNnZ0VBZks2ZmcxNzhTdEFzV1ZwTGNlUkxYbHR6azR4U0NuOWhPcUdYSDEvRDZDVGMKUHc4MThvVDNFUXpVSGJJcXY0K1VKbml3MXdhVGxoMmx1VHJnQ3JpQld2NnpKU0QyZC9hcnhwZW5vR1hHcWFiSwpuRjBMaG85RUZ6c0ZXWXhrNFIyOU5iTjArUVZCdnNXM0hpL3d5YlI3ck9EajZmbFlUU3B5cHpOSFZsYUZWQnk5CnAvMDhiL09BWk94Qjd1bDVWTFpDT1FSaThhVTZUajdDak1KU2dWcG5DMEhvTjhhaEUzYU5rQTRzbFhWUmZBSTIKc1UraU1GVytDSWJpUlZMN3F1VXlSdjRCNnBzR2ZRV2NRWDExeTVMTEJLNGhmc3hkZWNXekZORmIrVW5IRDN3MApDSUU4N1ExemxuREExU05Uc1VuMEVFMWFCYkNlbU9HV3d5Ylc0NUtMZ1FLQmdRRG1kQUVNT29GK2J0TTJJT0ZqCkJpNXJISU1ZZzJycnFRTGl4K3JUanZtOFU2N1c4NEZuWEl1Q3NHZk1ZWmI0enJnamNvdTNubHVuc1kydEVEalUKZmJxTitydCtBc0ZFamEwclJIc2dhNXdiRmtoQzJGNXdKUktVSlAxZ2J5OHU2NHFpaVhYMEIyK1JlT0pIK1FKWQpwemlxaFJFTG5UamdYWUNsdmV3Z0Q5MlVqd0tCZ1FEbHJ5aFRtellQY0ZBTGQzN1ZSZ1l2eHdWUi90RjhMR2I5CnpSbzAyc3ZuZmJ1dGxLZFVxTVI3a3oyVlNEWjk2QVJKK2JJRHVSU0x4RWI1b21ZQkpJUFVHOTlmY0xWTllPUzUKcDhrSjZJbFFkVnJxK3BJdnh1dXMzYVlSdXRzWWN4TGovMWhzdnYydGwydGNrQkhLRTR6K2lCRk41R0tpUmYvSgowdldqTm1JNzF3S0JnUURqQklQRHVCNjRuaFFTem5FNVMyMk90cGV1SGtmRnZzakkvb2Vsd01MamNzeFprNmQyCld3UlR5ZE4yMHV3V1RnMjNYYStsUXFxbmw1RXBXMEdna2Zxa3dzclFaNFpjTWZUVkdyRHdUeEdJM1hweDN4T3AKQmR3M2Mvam1kcURVWjlRNktZKzR4VnB5dzlLbGMvZUx2YTlreTVEdkVBSm5nN1Nua1dCNmRTYWlvUUtCZ1FDNwpSa0lmU1dLZTIvaW9JTnF0a3RiZ2hlbjBuVXk1Ym9yYlRpeWNBL3BWMmRMNUNVZ1dZelV4ZlRDdFU1LzZzUDh1ClFnVy91MXpoU1R5RnRzQnRGaFRYRVpMa0FzWVJQWHZCVk9rNnh2dVBPdURTejFQNjJMcTR6RkRvQys4dzFFTUcKMitDQmFvajB6WTJnZjJmQjJJY1IwbWdwbHBwRnJjV09EaEJ5NzVqUktRS0JnRW00SU05bnJnMmtrT0dTK0REMAp4L0hoTG1YWXR5VDdoMk9aUGttTFdnNFFMYzd6ZFdTUCtwejh4eEdkS1RrbFh2Y0VDYi9hdzFGaXNVTi9tbm8xCmk4Z0hFMDBwc0N2aVJSWERJMlpSMVZaWm03dFdEMVRQSU9hbUdHcnVQYWgvSXZ0UUlrcXpZR0lZdjlIUjhyU20KODh5Q2FiU1RLVGpuTldkUnYwZElTYW10Ci0tLS0tRU5EIFBSSVZBVEUgS0VZLS0tLS0K"
 
 defaultIAP:
-  client_id: ""
-  client_secret: ""
+  clientId: ""
+  clientSecret: ""
 
 ##
 ## nginx-ingress configuration
 ## ref: https://github.com/nginxinc/kubernetes-ingress/tree/v1.5.4/deployments/helm-chart
 nginx-ingress:
+  enabled: false
 
   controller:
     replicaCount: 2

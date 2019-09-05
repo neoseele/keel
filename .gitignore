@@ -13,3 +13,6 @@
 
 # Dependencies
 */charts/*
+
+# Script which may contains secrets
+run.sh

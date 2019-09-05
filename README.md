@@ -18,15 +18,3 @@ helm dep update
 # grant yourself cluster-admin role
 kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value core/account)
 ```
-
-## Test
-
-```sh
-make test
-```
-
-## Clean up
-
-```sh
-make clean
-```
