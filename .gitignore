@@ -14,5 +14,5 @@
 # Dependencies
 */charts/*
 
-# Script which may contains secrets
-run.sh
+# ignore values yaml with secrets
+*-secrets.yaml

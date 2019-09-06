@@ -163,11 +163,6 @@ service:
   http2: 
     enabled: false
 
-  externalPort:
-    grpc: 8079
-    http: 8080
-    https: 8082
-
 ##
 ## Ingress configuration
 ingress:
@@ -175,12 +170,13 @@ ingress:
   ## Enable ingress
   enabled: false
 
-  class: gce
-  # class: nginx
+  class:
+    gce: true
+    # nginx: true
 
   annotations:  
     kubernetes.io/ingress.global-static-ip-name: asuka
-    nginx.ingress.kubernetes.io/rewrite-target: /
+    # nginx.ingress.kubernetes.io/rewrite-target: /
     # kubernetes.io/tls-acme: "true"
 
   neg:
@@ -218,7 +214,6 @@ defaultIAP:
 ## nginx-ingress configuration
 ## ref: https://github.com/nginxinc/kubernetes-ingress/tree/v1.5.4/deployments/helm-chart
 nginx-ingress:
-  enabled: false
 
   controller:
     replicaCount: 2
