@@ -11,8 +11,8 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-# Dependencies
-*/charts/*
+# Chart deps
+*.tgz
 
 # ignore values yaml with secrets
 *-secrets.yaml

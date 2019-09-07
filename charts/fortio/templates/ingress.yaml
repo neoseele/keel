@@ -2,12 +2,11 @@
 {{- $fullName := include "fortio.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $servicePort := .Values.ingress.servicePort | default "http" -}}
-{{- $namespace := .Release.Namespace -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "fortio.name" . }}
     chart: {{ template "fortio.chart" . }}

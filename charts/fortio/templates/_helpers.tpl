@@ -51,3 +51,14 @@ Create iap secret name from fullname
 {{- define "fortio.iapSecretName" -}}
 {{- printf "%s-%s" (include "fortio.fullname" .) "iap" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create the name of the service account
+*/}}
+{{- define "fortio.serviceAccountName" -}}
+{{- if .Values.serviceAccount.create -}}
+    {{ default (include "fortio.fullname" .) .Values.serviceAccount.name }}
+{{- else -}}
+    {{ default "default" .Values.serviceAccount.name }}
+{{- end -}}
+{{- end -}}

@@ -1,10 +1,13 @@
 {{- if .Values.service.enabled -}}
-{{- $type := .Values.service.type | default "ClusterIP" }}
 {{- $fullName := include "fortio.fullname" . -}}
+{{- $type := .Values.service.type | default "NodePort" }}
+{{- $sessionAffinity := .Values.service.sessionAffinity | default "None" }}
+{{- $externalTrafficPolicy := .Values.service.externalTrafficPolicy | default "Cluster" }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $fullName }}
+  namespace: {{ .Release.Namespace }}
   annotations:
     {{- if and .Values.service.ilb.enabled (contains "LoadBalancer" $type) }}
     cloud.google.com/load-balancer-type: internal
@@ -29,9 +32,9 @@ spec:
   clusterIP: None
   {{- else }}
   type: {{ $type }}
-  sessionAffinity: {{ .sessionAffinity | default "None" }}
+  sessionAffinity: {{ $sessionAffinity }}
     {{- if or (contains "LoadBalancer" $type) (contains "NodePort" $type ) }}
-  externalTrafficPolicy: {{ .externalTrafficPolicy | default "Cluster" }}
+  externalTrafficPolicy: {{ $externalTrafficPolicy }}
     {{- end }}
   {{- end }}
   ports:
