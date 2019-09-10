@@ -14,5 +14,8 @@
 # Chart deps
 *.tgz
 
-# ignore values yaml with secrets
+# Values yaml with secrets
 *-secrets.yaml
+
+# VSCode internals
+.vscode
