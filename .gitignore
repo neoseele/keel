@@ -19,3 +19,14 @@
 
 # VSCode internals
 .vscode
+# Dependencies
+*/charts/*
+
+test/vendor
+
+# Local .terraform directories
+**/.terraform/*
+
+# .tfstate files
+*.tfstate
+*.tfstate.*

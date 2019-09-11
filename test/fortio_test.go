@@ -1,30 +1,23 @@
 package test
 
 import (
-	"fmt"
-	"strings"
+
 	"testing"
-	"time"
 
 	"github.com/gruntwork-io/terratest/modules/gcp"
-	"github.com/gruntwork-io/terratest/modules/random"
-	"github.com/gruntwork-io/terratest/modules/retry"
-	"github.com/gruntwork-io/terratest/modules/ssh"
 	"github.com/gruntwork-io/terratest/modules/terraform"
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestTerraformGcpExample(t *testing.T) {
 	t.Parallel()
 
-	exampleDir := test_structure.CopyTerraformFolderToTemp(t, "../", "fortio/terraform")
+	exampleDir := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/fortio/terraform")
 
 	// Get the Project Id to use
 	projectId := gcp.GetGoogleProjectIDFromEnvVar(t)
 
-	// Create all resources in the following zone
-	zone := "us-east1-b"
+
 
 
 	terraformOptions := &terraform.Options{
@@ -33,7 +26,7 @@ func TestTerraformGcpExample(t *testing.T) {
 
 		// Variables to pass to our Terraform code using -var options
 		Vars: map[string]interface{}{
-			"gcp_project_id": projectId,
+			"project_id": projectId,
 		},
 	}
 
