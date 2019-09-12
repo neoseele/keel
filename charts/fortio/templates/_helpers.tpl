@@ -57,8 +57,8 @@ Create the name of the service account
 */}}
 {{- define "fortio.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create -}}
-    {{ default (include "fortio.fullname" .) .Values.serviceAccount.name }}
+    {{ default (include "fortio.fullname" .) .Values.serviceAccount.name | trunc 63 | trimSuffix "-" }}
 {{- else -}}
-    {{ default "default" .Values.serviceAccount.name }}
+    {{ default "default" .Values.serviceAccount.name | trunc 63 | trimSuffix "-" }}
 {{- end -}}
 {{- end -}}

@@ -17,7 +17,7 @@ service:
   ##
   ## Service type (default to "NodePort")
   # type: ClusterIP
-  # type: LoadBalancer
+  type: LoadBalancer
   # type: NodePort
   ##
   ## External traffic policy (default to "Cluster")
@@ -29,7 +29,7 @@ service:
   sessionAffinity: ClientIP
 
   ilb: 
-    enabled: false
+    enabled: true
   headless: 
     enabled: false
   http2: 
