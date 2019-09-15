@@ -42,6 +42,7 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - /usr/bin/fortio
             - server
             - -logtostderr
             - -v=2
@@ -74,7 +75,16 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /data
+            {{- if .Values.ingress.tls.enabled }}
+            - name: tls
+              mountPath: /tls
+            {{- end }}
       volumes:
+        {{- if .Values.ingress.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.ingress.tls.existingSecret | default (include "fortio.tlsSecretName" .) }}
+        {{- end }}
         - name: data
         # [START pvc]
         {{- if .Values.persistence.enabled }}

@@ -163,7 +163,7 @@ service:
   ## Service type (default to "NodePort")
   # type: ClusterIP
   # type: LoadBalancer
-  # type: NodePort
+  type: NodePort
   ##
   ## External traffic policy (default to "Cluster")
   # externalTrafficPolicy: Cluster

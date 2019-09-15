@@ -1,0 +1,166 @@
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "go-web.frontend" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "go-web.name" . }}
+    chart: {{ template "go-web.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    tier: frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "go-web.name" . }}
+      release: {{ .Release.Name }}
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: {{ template "go-web.name" . }}
+        release: {{ .Release.Name }}
+        tier: frontend
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- if .Values.ingress.tls.enabled }}
+            - -cert=/tls/tls.crt
+            - -key=/tls/tls.key
+            {{- end }}
+            - -backend={{ template "go-web.backend" . }}:80
+            - -grpc-backend={{ template "go-web.backend" . }}:50000
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: grpc
+              containerPort: 50000
+              protocol: TCP
+          livenessProbe:
+            exec: # (https://github.com/istio/istio/issues/2628)
+              command:
+                - /bin/sh
+                - -c
+                - curl localhost:80/liveness
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - curl localhost:80/readiness
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+            {{- if .Values.ingress.tls.enabled }}
+            - name: tls
+              mountPath: /tls
+            {{- end }}
+      volumes:
+        {{- if .Values.ingress.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ .Values.ingress.tls.existingSecret | default (include "go-web.ingressTLSSecretName" .) }}
+        {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "go-web.backend" . }}
+  labels:
+    app: {{ template "go-web.name" . }}
+    chart: {{ template "go-web.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    tier: backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "go-web.name" . }}
+      release: {{ .Release.Name }}
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: {{ template "go-web.name" . }}
+        release: {{ .Release.Name }}
+        tier: backend
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- if .Values.backend.tls.enabled }}
+            - -cert=/tls/tls.crt
+            - -key=/tls/tls.key
+            {{- end }}
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+            - name: https
+              containerPort: 443
+              protocol: TCP
+            - name: grpc
+              containerPort: 50000
+              protocol: TCP
+          livenessProbe:
+            exec: # (https://github.com/istio/istio/issues/2628)
+              command:
+                - /bin/sh
+                - -c
+                - curl localhost:80/liveness
+          readinessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - curl localhost:80/readiness
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+          volumeMounts:
+            {{- if .Values.backend.tls.enabled }}
+            - name: tls
+              mountPath: /tls
+            {{- end }}
+      volumes:
+        {{- if .Values.backend.tls.enabled }}
+        - name: tls
+          secret:
+            secretName: {{ template "go-web.backendTLSSecretName" . }}
+        {{- end }}
+    {{- with .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
