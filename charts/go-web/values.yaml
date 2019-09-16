@@ -15,14 +15,14 @@ frontend:
     type: NodePort  
 
 backend:
-  replicaCount: 2
+  replicaCount: 1
   tls: 
     enabled: true
   service:
     type: ClusterIP
 
 ingress:
-  enabled: true
+  enabled: false
   annotations:
     kubernetes.io/ingress.global-static-ip-name: asuka
     
@@ -52,3 +52,35 @@ tolerations: []
 
 affinity: {}
 
+istio:
+  enabled: false
+  
+  trafficPolicy:
+    mode: DISABLE
+    # mode: ISTIO_MUTUAL
+
+  routing: 
+
+    trafficSplit:
+      v1: 10
+      v2: 90
+    
+    delayInjection: {}
+      # match:
+      #   - headers:
+      #       foo:
+      #         exact: bar
+      # fault:
+      #   delay:
+      #     percent: 100
+      #     fixedDelay: 7s
+    
+    faultInjection:
+      match:
+        - headers:
+            foo:
+              exact: bar
+      fault:
+        abort:
+          percent: 100
+          httpStatus: 500

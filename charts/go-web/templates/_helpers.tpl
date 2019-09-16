@@ -46,6 +46,13 @@ Create frontend name
 {{- end -}}
 
 {{/*
+Create mongodb name
+*/}}
+{{- define "go-web.mongodb" -}}
+{{- printf "%s-mongodb" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+
+{{/*
 Create tls secret name
 */}}
 {{- define "go-web.backendTLSSecretName" -}}

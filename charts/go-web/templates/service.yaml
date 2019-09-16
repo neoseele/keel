@@ -61,3 +61,26 @@ spec:
     app: {{ template "go-web.name" . }}
     tier: backend
     release: {{ .Release.Name }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "go-web.mongodb" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "go-web.name" . }}
+    chart: {{ template "go-web.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    tier: mongodb
+spec:
+  ports:
+    - name: mongo
+      protocol: TCP
+      port: 27017
+      targetPort: 27017
+  selector:
+    app: {{ template "go-web.name" . }}
+    tier: mongodb
+    release: {{ .Release.Name }}

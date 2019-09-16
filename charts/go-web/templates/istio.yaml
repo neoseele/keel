@@ -1,0 +1,171 @@
+{{- if .Values.istio.enabled }}
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    istio-injection: enabled
+  name: {{ .Release.Namespace }}
+
+## dr frontend
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "go-web.frontend" . }}-dr
+  name: {{ .Release.Namespace }}
+spec:
+  host: {{ template "go-web.frontend" . }}
+  trafficPolicy:
+    tls:
+      mode: {{ .Values.istio.trafficPolicy.mode }}
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+
+## dr backend
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "go-web.backend" . }}-dr
+  name: {{ .Release.Namespace }}
+spec:
+  host: {{ template "go-web.backend" . }}
+  trafficPolicy:
+    tls:
+      mode: {{ .Values.istio.trafficPolicy.mode }}
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+    - name: v2
+      labels:
+        version: v2
+
+## dr mongodb
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "go-web.mongodb" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  host: {{ template "go-web.mongodb" . }}
+  trafficPolicy:
+    tls:
+      mode: {{ .Values.istio.trafficPolicy.mode }}
+  subsets:
+    - name: v1
+      labels:
+        version: v1
+
+## vs frontend
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "go-web.frontend" . }}-vs
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - {{ template "go-web.frontend" . }}
+  http:
+    - route:
+      - destination:
+          host: {{ template "go-web.frontend" . }}
+          subset: v1
+
+# vs backend
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "go-web.backend" . }}-vs
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+    - {{ template "go-web.backend" . }}
+  http:
+    - route:
+      - destination:
+          host: {{ template "go-web.backend" . }}
+          subset: v1
+        weight: {{ .Values.istio.routing.trafficSplit.v1 | default 50 }}
+      - destination:
+          host: {{ template "go-web.backend" . }}
+          subset: v2
+        weight: {{ .Values.istio.routing.trafficSplit.v2 | default 50 }}
+        {{- with .Values.istio.routing }}
+          {{- if .faultInjection }}
+{{ toYaml .faultInjection | indent 8 -}}
+          {{- end }}
+          {{- if .delayInjection }}
+{{ toYaml .delayInjection | indent 8 -}}
+          {{- end }}
+        {{- end }}
+
+## vs mongodb
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "go-web.mongodb" . }}-vs
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+  - {{ template "go-web.mongodb" . }}
+  http:
+  - route:
+    - destination:
+        host: {{ template "go-web.mongodb" . }}
+        subset: v1
+
+## gateway
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: {{ template "go-web.fullname" . }}-gateway
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "go-web.fullname" . }}-gateway-vs
+  namespace: {{ .Release.Namespace }}
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - {{ template "go-web.fullname" . }}-gateway
+  http:
+  - match:
+    - uri:
+        exact: /
+    - uri:
+        prefix: /ping-backend
+    - uri:
+        prefix: /ping-grpc-backend
+    - uri:
+        prefix: /people
+    - uri:
+        prefix: /stress
+    route:
+    - destination:
+        host: {{ template "go-web.frontend" . }}
+        port:
+          number: 80
+
+{{- end }}
