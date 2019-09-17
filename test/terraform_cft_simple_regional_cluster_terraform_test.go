@@ -9,10 +9,10 @@ import (
 	test_structure "github.com/gruntwork-io/terratest/modules/test-structure"
 )
 
-func TestTerraformGcpExample(t *testing.T) {
+func TestTerraformCFTSimpleRegionalCluster(t *testing.T) {
 	t.Parallel()
 
-	exampleDir := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/fortio/terraform")
+	exampleDir := test_structure.CopyTerraformFolderToTemp(t, "../", "examples/cft_simple_regional_cluster")
 
 	// Get the Project Id to use
 	projectId := gcp.GetGoogleProjectIDFromEnvVar(t)
