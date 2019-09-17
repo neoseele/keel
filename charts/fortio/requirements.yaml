@@ -1,5 +1,5 @@
 dependencies:
 - name: nginx-ingress
-  version: 1.19.1
-  repository: https://kubernetes-charts.storage.googleapis.com/
-  condition: ingress.class.nginx
+  version: 0.3.4
+  repository: https://helm.nginx.com/stable
+  condition: ingress.nginx.enabled

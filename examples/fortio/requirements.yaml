@@ -1,5 +1,0 @@
-dependencies:
-- name: nginx-ingress
-  version: 0.3.4
-  repository: https://helm.nginx.com/stable
-  condition: ingress.nginx.enabled

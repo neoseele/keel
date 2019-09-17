@@ -3,7 +3,6 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: {{ template "fortio.dataVolumeName" . }}
-  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "fortio.name" . }}
     chart: {{ template "fortio.chart" . }}

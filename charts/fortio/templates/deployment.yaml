@@ -42,7 +42,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
-            - /usr/bin/fortio
             - server
             - -logtostderr
             - -v=2
@@ -73,18 +72,18 @@ spec:
 {{ toYaml .Values.resources | indent 12 -}}
           # [END resources]
           volumeMounts:
-            - name: data
-              mountPath: /data
-            {{- if .Values.ingress.tls.enabled }}
+            # [START tls_mount]
             - name: tls
               mountPath: /tls
-            {{- end }}
+            # [END tls_mount]
+            - name: data
+              mountPath: /data
       volumes:
-        {{- if .Values.ingress.tls.enabled }}
+        # [START tls_secret]
         - name: tls
           secret:
             secretName: {{ .Values.ingress.tls.existingSecret | default (include "fortio.tlsSecretName" .) }}
-        {{- end }}
+        # [END tls_secret]
         - name: data
         # [START pvc]
         {{- if .Values.persistence.enabled }}
@@ -103,33 +102,41 @@ spec:
 {{ toYaml . | indent 8 -}}
         {{- end }}
       # [END nodeSelector]
-      # [START serviceAccountName]
-      serviceAccountName: {{ template "fortio.serviceAccountName" . }}
-      # [END serviceAccountName]
       # [START affinity]
       affinity:
-        # [START nodeAffinity]
-        {{- if .Values.nodeAffinity }}
+      {{- with .Values.nodeAffinity }}
         nodeAffinity:
-{{ toYaml .Values.nodeAffinity | indent 10 -}}
+        {{- if .soft }}
+{{ toYaml .soft | indent 10 -}}
         {{- end }}
-        # [END nodeAffinity]
-        # [START podAffinity]
-        {{- if .Values.podAffinity }}
+        {{- if .hard }}
+{{ toYaml .hard | indent 10 -}}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.podAffinity }}
         podAffinity:
-{{ toYaml .Values.podAffinity | indent 10 -}}
+        {{- if .soft }}
+{{ toYaml .soft | indent 10 -}}
         {{- end }}
-        # [END podAffinity]
-        # [START podAntiAffinity]
-        {{- if .Values.podAntiAffinity }}
+        {{- if .hard }}
+{{ toYaml .hard | indent 10 -}}
+        {{- end }}
+      {{- end }}
+      {{- with .Values.podAntiAffinity }}
         podAntiAffinity:
-{{ toYaml .Values.podAntiAffinity | indent 10 -}}
+        {{- if .soft }}
+{{ toYaml .soft | indent 10 -}}
         {{- end }}
-        # [END podAntiAffinity]
+        {{- if .hard }}
+{{ toYaml .hard | indent 10 -}}
+        {{- end }}
+      {{- end }}
       # [END affinity]
       # [START tolerations]
+      {{- with .Values.tolerations }}
       tolerations:
-{{ toYaml .Values.tolerations | indent 8 -}}
+{{ toYaml . | indent 8 -}}
+      {{- end }}
       # [END tolerations]
     # [END app_container]
       
