@@ -2,19 +2,22 @@
 {{- $fullName := include "fortio.fullname" . -}}
 {{- $ingressPath := .Values.ingress.path -}}
 {{- $servicePort := .Values.ingress.servicePort | default "http" -}}
-{{- $namespace := .Release.Namespace -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ $fullName }}
-  namespace: {{ $namespace }}
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "fortio.name" . }}
     chart: {{ template "fortio.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
   annotations:
-    kubernetes.io/ingress.class: {{ .Values.ingress.class }}
+    {{- if .Values.ingress.class.nginx }}
+    kubernetes.io/ingress.class: nginx
+    {{- else }}
+    kubernetes.io/ingress.class: gce
+    {{- end }}
 {{ toYaml .Values.ingress.annotations | indent 4 }}
 spec:
 {{- if .Values.ingress.tls.enabled }}

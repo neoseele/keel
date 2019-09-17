@@ -2,7 +2,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "fortio.name" -}}
+{{- define "go-web.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
@@ -11,7 +11,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "fortio.fullname" -}}
+{{- define "go-web.fullname" -}}
 {{- if .Values.fullnameOverride -}}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" -}}
 {{- else -}}
@@ -27,40 +27,43 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "fortio.chart" -}}
+{{- define "go-web.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create data volume name from fullname
+Create frontend name
 */}}
-{{- define "fortio.dataVolumeName" -}}
-{{- printf "%s-data" (include "fortio.fullname" .) | replace "+" "_"  | trunc 63 | trimSuffix "-" -}}
+{{- define "go-web.frontend" -}}
+{{- printf "%s-frontend" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create tls secret name from fullname
+Create frontend name
 */}}
-{{- define "fortio.tlsSecretName" -}}
-{{- printf "%s-tls" (include "fortio.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- define "go-web.backend" -}}
+{{- printf "%s-backend" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create iap secret name from fullname
+Create mongodb name
 */}}
-{{- define "fortio.iapSecretName" -}}
-{{- printf "%s-iap" (include "fortio.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- define "go-web.mongodb" -}}
+{{- printf "%s-mongodb" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
-Create the name of the service account
+Create tls secret name
 */}}
-{{- define "fortio.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create -}}
-    {{ default (include "fortio.fullname" .) .Values.serviceAccount.name | replace "+" "_" | trunc 63 | trimSuffix "-" }}
-{{- else -}}
-    {{ default "default" .Values.serviceAccount.name | replace "+" "_" | trunc 63 | trimSuffix "-" }}
+{{- define "go-web.backendTLSSecretName" -}}
+{{- printf "%s-backend-tls" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create tls secret name
+*/}}
+{{- define "go-web.ingressTLSSecretName" -}}
+{{- printf "%s-ingress-tls" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
 {{/*
@@ -69,6 +72,6 @@ This is where the secret creation resources lives
 Workaround if the chart is deployed in a istio enabled cluster
 Using a temp namespace will ensure the istio sidecar is NOT auto injected to the secret creator job
 */}}
-{{- define "fortio.tempNamespaceName" -}}
-{{- printf "%s-ns-temp" (include "fortio.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- define "go-web.tempNamespaceName" -}}
+{{- printf "%s-ns-temp" (include "go-web.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
