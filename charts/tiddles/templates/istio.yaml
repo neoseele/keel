@@ -12,10 +12,10 @@ metadata:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ template "go-web.frontend" . }}-dr
+  name: {{ template "tiddles.frontend" . }}-dr
   name: {{ .Release.Namespace }}
 spec:
-  host: {{ template "go-web.frontend" . }}
+  host: {{ template "tiddles.frontend" . }}
   trafficPolicy:
     tls:
       mode: {{ .Values.istio.trafficPolicy.mode }}
@@ -29,10 +29,10 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ template "go-web.backend" . }}-dr
+  name: {{ template "tiddles.backend" . }}-dr
   name: {{ .Release.Namespace }}
 spec:
-  host: {{ template "go-web.backend" . }}
+  host: {{ template "tiddles.backend" . }}
   trafficPolicy:
     tls:
       mode: {{ .Values.istio.trafficPolicy.mode }}
@@ -49,10 +49,10 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ template "go-web.mongodb" . }}
+  name: {{ template "tiddles.mongodb" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  host: {{ template "go-web.mongodb" . }}
+  host: {{ template "tiddles.mongodb" . }}
   trafficPolicy:
     tls:
       mode: {{ .Values.istio.trafficPolicy.mode }}
@@ -66,15 +66,15 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "go-web.frontend" . }}-vs
+  name: {{ template "tiddles.frontend" . }}-vs
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
-    - {{ template "go-web.frontend" . }}
+    - {{ template "tiddles.frontend" . }}
   http:
     - route:
       - destination:
-          host: {{ template "go-web.frontend" . }}
+          host: {{ template "tiddles.frontend" . }}
           subset: v1
 
 # vs backend
@@ -82,19 +82,19 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "go-web.backend" . }}-vs
+  name: {{ template "tiddles.backend" . }}-vs
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
-    - {{ template "go-web.backend" . }}
+    - {{ template "tiddles.backend" . }}
   http:
     - route:
       - destination:
-          host: {{ template "go-web.backend" . }}
+          host: {{ template "tiddles.backend" . }}
           subset: v1
         weight: {{ .Values.istio.routing.trafficSplit.v1 | default 50 }}
       - destination:
-          host: {{ template "go-web.backend" . }}
+          host: {{ template "tiddles.backend" . }}
           subset: v2
         weight: {{ .Values.istio.routing.trafficSplit.v2 | default 50 }}
         {{- with .Values.istio.routing }}
@@ -111,15 +111,15 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "go-web.mongodb" . }}-vs
+  name: {{ template "tiddles.mongodb" . }}-vs
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
-  - {{ template "go-web.mongodb" . }}
+  - {{ template "tiddles.mongodb" . }}
   http:
   - route:
     - destination:
-        host: {{ template "go-web.mongodb" . }}
+        host: {{ template "tiddles.mongodb" . }}
         subset: v1
 
 ## gateway
@@ -127,7 +127,7 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: {{ template "go-web.fullname" . }}-gateway
+  name: {{ template "tiddles.fullname" . }}-gateway
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
@@ -143,13 +143,13 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "go-web.fullname" . }}-gateway-vs
+  name: {{ template "tiddles.fullname" . }}-gateway-vs
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
   - "*"
   gateways:
-  - {{ template "go-web.fullname" . }}-gateway
+  - {{ template "tiddles.fullname" . }}-gateway
   http:
   - match:
     - uri:
@@ -164,7 +164,7 @@ spec:
         prefix: /stress
     route:
     - destination:
-        host: {{ template "go-web.frontend" . }}
+        host: {{ template "tiddles.frontend" . }}
         port:
           number: 80
 

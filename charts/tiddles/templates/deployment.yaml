@@ -3,11 +3,11 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "go-web.frontend" . }}
+  name: {{ template "tiddles.frontend" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "go-web.name" . }}
-    chart: {{ template "go-web.chart" . }}
+    app: {{ template "tiddles.name" . }}
+    chart: {{ template "tiddles.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     tier: frontend
@@ -15,14 +15,14 @@ spec:
   replicas: {{ .Values.frontend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "go-web.name" . }}
+      app: {{ template "tiddles.name" . }}
       release: {{ .Release.Name }}
       tier: frontend
       version: v1
   template:
     metadata:
       labels:
-        app: {{ template "go-web.name" . }}
+        app: {{ template "tiddles.name" . }}
         release: {{ .Release.Name }}
         tier: frontend
         version: v1
@@ -32,12 +32,16 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - /tiddles
             {{- if .Values.backend.tls.enabled }}
-            - -cert=/tls/tls.crt
-            - -key=/tls/tls.key
+            - --cert=/tls/tls.crt
+            - --key=/tls/tls.key
             {{- end }}
-            - -backend={{ template "go-web.backend" . }}:80
-            - -grpc-backend={{ template "go-web.backend" . }}:50000
+            {{- if .Values.stackdriver.trace.enabled }}
+            - --trace
+            {{- end }}
+            - --backend={{ template "tiddles.backend" . }}:80
+            - --grpc-backend={{ template "tiddles.backend" . }}:50000
           ports:
             - name: http
               containerPort: 80
@@ -71,7 +75,7 @@ spec:
         {{- if .Values.backend.tls.enabled }}
         - name: tls
           secret:
-            secretName: {{ template "go-web.backendTLSSecretName" . }}
+            secretName: {{ template "tiddles.backendTLSSecretName" . }}
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -91,11 +95,11 @@ spec:
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "go-web.backend" . }}
+  name: {{ template "tiddles.backend" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "go-web.name" . }}
-    chart: {{ template "go-web.chart" . }}
+    app: {{ template "tiddles.name" . }}
+    chart: {{ template "tiddles.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     tier: backend
@@ -103,14 +107,14 @@ spec:
   replicas: {{ .Values.backend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "go-web.name" . }}
+      app: {{ template "tiddles.name" . }}
       release: {{ .Release.Name }}
       tier: backend
       version: v1
   template:
     metadata:
       labels:
-        app: {{ template "go-web.name" . }}
+        app: {{ template "tiddles.name" . }}
         release: {{ .Release.Name }}
         tier: backend
         version: v1
@@ -120,9 +124,13 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
+            - /tiddles
             {{- if .Values.backend.tls.enabled }}
-            - -cert=/tls/tls.crt
-            - -key=/tls/tls.key
+            - --cert=/tls/tls.crt
+            - --key=/tls/tls.key
+            {{- end }}
+            {{- if .Values.stackdriver.trace.enabled }}
+            - --trace
             {{- end }}
           ports:
             - name: http
@@ -157,7 +165,7 @@ spec:
         {{- if .Values.backend.tls.enabled }}
         - name: tls
           secret:
-            secretName: {{ template "go-web.backendTLSSecretName" . }}
+            secretName: {{ template "tiddles.backendTLSSecretName" . }}
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -177,11 +185,11 @@ spec:
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
-  name: {{ template "go-web.backend" . }}-v2
+  name: {{ template "tiddles.backend" . }}-v2
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "go-web.name" . }}
-    chart: {{ template "go-web.chart" . }}
+    app: {{ template "tiddles.name" . }}
+    chart: {{ template "tiddles.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
     tier: backend
@@ -189,14 +197,14 @@ spec:
   replicas: {{ .Values.backend.replicaCount }}
   selector:
     matchLabels:
-      app: {{ template "go-web.name" . }}
+      app: {{ template "tiddles.name" . }}
       release: {{ .Release.Name }}
       tier: backend
       version: v2
   template:
     metadata:
       labels:
-        app: {{ template "go-web.name" . }}
+        app: {{ template "tiddles.name" . }}
         release: {{ .Release.Name }}
         tier: backend
         version: v2
@@ -204,19 +212,23 @@ spec:
       initContainers:
       - name: wait-for-db
         image: busybox
-        command: ['sh', '-c', 'until nc -w 2 -z {{ template "go-web.mongodb" . }} 27017; do sleep 2; done']
+        command: ['sh', '-c', 'until nc -w 2 -z {{ template "tiddles.mongodb" . }} 27017; do sleep 2; done']
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          args:
+          command:
+            - /tiddles
             {{- if .Values.backend.tls.enabled }}
-            - -cert=/tls/tls.crt
-            - -key=/tls/tls.key
+            - --cert=/tls/tls.crt
+            - --key=/tls/tls.key
+            {{- end }}
+            {{- if .Values.stackdriver.trace.enabled }}
+            - --trace
             {{- end }}
           env:
             - name: MONGODB_URL
-              value: {{ template "go-web.mongodb" . }}
+              value: {{ template "tiddles.mongodb" . }}
             - name: VERSION
               value: v2
           ports:
@@ -252,7 +264,7 @@ spec:
         {{- if .Values.backend.tls.enabled }}
         - name: tls
           secret:
-            secretName: {{ template "go-web.backendTLSSecretName" . }}
+            secretName: {{ template "tiddles.backendTLSSecretName" . }}
         {{- end }}
     {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -272,20 +284,20 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "go-web.mongodb" . }}
+  name: {{ template "tiddles.mongodb" . }}
   namespace: {{ .Release.Namespace }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: {{ template "go-web.name" . }}
+      app: {{ template "tiddles.name" . }}
       release: {{ .Release.Name }}
       tier: mongodb
       version: v1
   template:
     metadata:
       labels:
-        app: {{ template "go-web.name" . }}
+        app: {{ template "tiddles.name" . }}
         release: {{ .Release.Name }}
         tier: mongodb
         version: v1
