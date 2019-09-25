@@ -8,7 +8,7 @@ image:
   pullPolicy: Always
 
 podSecurityPolicy:
-  enabled: true
+  enabled: false
 
 ##
 ## Service configuration
@@ -29,7 +29,7 @@ service:
   sessionAffinity: ClientIP
 
   ilb: 
-    enabled: true
+    enabled: false
   headless: 
     enabled: false
   http2: 

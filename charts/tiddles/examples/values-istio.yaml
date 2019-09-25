@@ -10,7 +10,7 @@ image:
 frontend:
   replicaCount: 1
   tls:
-    enabled: false # istio breaks frontend->backend grpc connection when TLS is enforced on the app
+    enabled: false # istio breaks frontend->backend grpc connection when TLS is required on the app
   service:
     type: NodePort  
 
@@ -23,16 +23,6 @@ backend:
 
 ingress:
   enabled: false
-  annotations:
-    kubernetes.io/ingress.global-static-ip-name: asuka
-    
-  tls:
-    enabled: true
-    existingSecret:
-  
-  path: /*
-  servicePort: http
-  host: asuka.premium-cloud-support.com
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

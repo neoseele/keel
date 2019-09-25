@@ -76,14 +76,14 @@ istio:
       #     fixedDelay: 7s
     
     faultInjection:
-      match:
-        - headers:
-            foo:
-              exact: bar
-      fault:
-        abort:
-          percent: 100
-          httpStatus: 500
+      # match:
+      #   - headers:
+      #       foo:
+      #         exact: bar
+      # fault:
+      #   abort:
+      #     percent: 100
+      #     httpStatus: 500
 
 
 stackdriver:
