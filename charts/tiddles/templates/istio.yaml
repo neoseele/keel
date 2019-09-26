@@ -13,7 +13,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: {{ template "tiddles.frontend" . }}-dr
-  name: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   host: {{ template "tiddles.frontend" . }}
   trafficPolicy:
@@ -30,7 +30,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: {{ template "tiddles.backend" . }}-dr
-  name: {{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
 spec:
   host: {{ template "tiddles.backend" . }}
   trafficPolicy:

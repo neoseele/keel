@@ -75,7 +75,7 @@ istio:
       #     percent: 100
       #     fixedDelay: 7s
     
-    faultInjection:
+    faultInjection: {}
       # match:
       #   - headers:
       #       foo:
