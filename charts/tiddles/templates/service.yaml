@@ -4,6 +4,10 @@ kind: Service
 metadata:
   name: {{ template "tiddles.frontend" . }}
   namespace: {{ .Release.Namespace }}
+  annotations:
+    {{- if .Values.ingress.neg.enabled }}
+    cloud.google.com/neg: '{"ingress": true}'
+    {{- end }}
   labels:
     app: {{ template "tiddles.name" . }}
     chart: {{ template "tiddles.chart" . }}

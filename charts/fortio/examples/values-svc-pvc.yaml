@@ -10,7 +10,7 @@ image:
 ##
 ## Service configuration
 service:
-  enabled: false
+  enabled: true
 
 ##
 ## Storage configuration

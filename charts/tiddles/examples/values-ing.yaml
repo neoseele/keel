@@ -22,9 +22,9 @@ backend:
     type: ClusterIP
 
 ingress:
-  enabled: false
+  enabled: true
   neg:
-    enabled: false
+    enabled: true
   annotations:
     # kubernetes.io/ingress.global-static-ip-name: asuka
     
@@ -55,40 +55,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-istio:
-  enabled: false
-  
-  trafficPolicy:
-    mode: DISABLE
-    # mode: ISTIO_MUTUAL
-
-  routing: 
-
-    trafficSplit:
-      v1: 10
-      v2: 90
-    
-    delayInjection: {}
-      # match:
-      #   - headers:
-      #       foo:
-      #         exact: bar
-      # fault:
-      #   delay:
-      #     percent: 100
-      #     fixedDelay: 7s
-    
-    faultInjection: {}
-      # match:
-      #   - headers:
-      #       foo:
-      #         exact: bar
-      # fault:
-      #   abort:
-      #     percent: 100
-      #     httpStatus: 500
-
 
 stackdriver:
   trace:

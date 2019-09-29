@@ -201,9 +201,6 @@ ingress:
   tls:
     enabled: false
     # existingSecret: premium-cloud-support-com-tls
-    # genSecret:
-    #   cert: 
-    #   key: 
 
   iap:
     enabled: false

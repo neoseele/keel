@@ -12,7 +12,7 @@ frontend:
   tls:
     enabled: false # istio breaks frontend->backend grpc connection when TLS is required on the app
   service:
-    type: NodePort  
+    type: ClusterIP  
 
 backend:
   replicaCount: 1
