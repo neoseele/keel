@@ -15,7 +15,8 @@ metadata:
   annotations:
     {{- if .Values.ingress.class.nginx }}
     kubernetes.io/ingress.class: nginx
-    {{- else }}
+    {{- end }}
+    {{- if .Values.ingress.class.gce }}
     kubernetes.io/ingress.class: gce
     {{- end }}
 {{ toYaml .Values.ingress.annotations | indent 4 }}
