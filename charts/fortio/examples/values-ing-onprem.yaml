@@ -38,7 +38,7 @@ ingress:
   enabled: true
 
   class:
-    # gce: true
+    gce: true
 
   annotations:
 
