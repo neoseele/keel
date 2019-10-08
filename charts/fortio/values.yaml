@@ -187,8 +187,11 @@ ingress:
   ## Enable ingress
   enabled: false
 
-  annotations:
-    kubernetes.io/ingress.class: gce
+  class:
+    nginx: false
+
+  annotations: {}
+    # kubernetes.io/ingress.class: gce
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/ingress.global-static-ip-name: asuka
     # nginx.ingress.kubernetes.io/rewrite-target: /
