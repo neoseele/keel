@@ -40,7 +40,7 @@ ingress:
   class:
     gce: true
 
-  annotations:
+  annotations: {}
 
   tls:
     enabled: false
