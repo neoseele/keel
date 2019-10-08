@@ -37,9 +37,6 @@ ingress:
   ## Enable ingress
   enabled: true
 
-  class:
-    gce: true
-
   annotations: {}
 
   tls:

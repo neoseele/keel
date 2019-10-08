@@ -36,10 +36,8 @@ ingress:
   ## Enable ingress
   enabled: true
 
-  class:
-    gce: true
-
-  annotations:  
+  annotations:
+    kubernetes.io/ingress.class: gce
     # kubernetes.io/ingress.global-static-ip-name: asuka
 
   neg:
