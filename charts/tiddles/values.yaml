@@ -9,8 +9,6 @@ image:
 
 frontend:
   replicaCount: 1
-  tls:
-    enabled: true
   service:
     type: NodePort  
 
@@ -25,11 +23,11 @@ ingress:
   enabled: false
   neg:
     enabled: false
-  annotations:
+  annotations: {}
     # kubernetes.io/ingress.global-static-ip-name: asuka
     
   tls:
-    enabled: true
+    enabled: false
     # if existingSecret is not specified
     # tls secret is auto-generated using ingress.host as CN
     existingSecret: 

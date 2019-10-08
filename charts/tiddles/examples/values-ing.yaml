@@ -9,8 +9,6 @@ image:
 
 frontend:
   replicaCount: 1
-  tls:
-    enabled: true
   service:
     type: NodePort  
 
@@ -26,7 +24,7 @@ ingress:
   neg:
     enabled: true
   annotations:
-    # kubernetes.io/ingress.global-static-ip-name: asuka
+    kubernetes.io/ingress.global-static-ip-name: asuka
     
   tls:
     enabled: true
@@ -36,7 +34,8 @@ ingress:
   
   path: /*
   servicePort: http
-  host: www.example.com
+  # host: www.example.com
+  host: asuka.premium-cloud-support.com
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
