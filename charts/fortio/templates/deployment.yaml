@@ -47,8 +47,10 @@ spec:
             - -logtostderr
             - -v=2
             - -redirect-port=disabled
+            {{- if .Values.ingress.tls.enabled }}
             - -cert=/tls/tls.crt
             - -key=/tls/tls.key
+            {{- end }}
             - -data-dir=/data
           ports:
             - name: grpc

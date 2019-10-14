@@ -14,7 +14,7 @@ service:
   ## Enable service
   enabled: true
   ##
-  ## Service type (default to "ClusterIP")
+  ## Service type (default to "NodePort")
   type: ClusterIP
   # type: LoadBalancer
   # type: NodePort

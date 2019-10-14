@@ -16,6 +16,7 @@ keel_run() {
 
   local usage="Usage: $FUNCNAME -r release [-n namespace][-a|-d|-v] [-f /path/to/values-xxx.yaml]"
 
+  local OPTIND
   while getopts ":r:n:advf:" arg; do
     case $arg in
       r) local release=${OPTARG} ;;
