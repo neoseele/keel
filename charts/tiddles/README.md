@@ -26,6 +26,11 @@ keel_run -r dev -f examples/values-ing.yaml -a
 # expose both backends as ClusterIP service
 # create istio objects (vs,dr etc)
 # expose frontend service via istio-ingressgateway
+openssl req -x509 -newkey rsa:2048 \
+  -subj "/C=US/ST=California/L=San Francisco/O=CPS/CN=*.example.com" \
+  -keyout tls.key -out tls.crt -days 3650 -nodes -sha256
+kubectl -n istio-system create secret tls istio-ingressgateway-certs --cert tls.crt --key tls.key
+
 keel_run -r dev -f examples/values-istio.yaml -n istio-workload -a
 ```
 

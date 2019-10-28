@@ -75,3 +75,10 @@ Using a temp namespace will ensure the istio sidecar is NOT auto injected to the
 {{- define "tiddles.tempNamespaceName" -}}
 {{- printf "%s-ns-temp" (include "tiddles.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create istio gateway name
+*/}}
+{{- define "tiddles.istioGatewayName" -}}
+{{- printf "%s-gateway" (include "tiddles.fullname" .) | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

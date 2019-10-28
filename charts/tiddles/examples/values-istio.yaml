@@ -48,7 +48,7 @@ istio:
   trafficPolicy:
     # mode: DISABLE
     mode: ISTIO_MUTUAL
-
+  
   routing: 
 
     trafficSplit:
